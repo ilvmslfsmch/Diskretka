@@ -84,15 +84,16 @@ int main(void) {
 			matplot::stem(n, x);
 			matplot::title("Единичный импульс, задержка - " + std::to_string(delay));
 			break;
-		case 2:
-			break;
+		case 2: {
 			std::cout << "Введите задержку по умолчанию (0 - без задержки, другое число - длина (время) задержки)" << std::endl;
+			std::cin >> delay;
 			for (size_t i = 0; i < n.size(); i++) {
 				x[i] = step(n[i], delay);
 			}
 			matplot::stem(n, x);
 			matplot::title("Сигнал, задержка - " + std::to_string(delay));
 			break;
+			}
 		case 3:
 			std::cout << "Введите значение a основания n^a (по умолчанию а = 0.8):" << std::endl;
 			std::cin >> a;
