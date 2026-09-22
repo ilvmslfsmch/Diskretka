@@ -19,6 +19,10 @@ long long fib_iter(const int n);
 
 double fib_bine(const int n);
 
+std::vector<double> solve_iter(int n, double x0, double x1, bool eq_a);
+
+double solve_analit(int n, double x0, double x1, bool eq_a);
+
 int main(void) {
 
 	std::cout << "Выберите задание:\n"
@@ -277,7 +281,106 @@ void task3() {
 }
 
 void task4() {
-	std::cout << "Заглушка";
+	int eq;
+	std::cout << "Выберите уравнение:\n"
+		<< "1 - x[n+2] = x[n+1] - x[n]\n"
+		<< "2 - x[n+2] = 2*x[n+1] - x[n]" << std::endl;
+	std::cin >> eq;
+
+	if (eq != 1 && eq != 2) {
+		std::cerr << "Некорректный выбор.";
+		std::exit(1);
+	}
+
+	bool eq_a = (eq == 1);
+
+	int n;
+	double x0, x1;
+	std::cout << "Введите N - количество членов последовательности:" << std::endl;
+	std::cin >> n;
+	std::cout << "Введите x0, x1" << std::endl;
+	std::cin >> x0 >> x1;
+
+	if (n < 2 || n > 100) {
+		std::cerr << "N должно быть в промежутке от 2 до 100";
+		std::exit(1);
+	}
+
+	std::vector<double> x_iter = solve_iter(n, x0, x1, eq_a);
+	std::vector<double> n_vec;
+	std::vector<double> iter_vec;
+	std::vector<double> analit_vec;
+
+	for (int i = 0; i <= n; i++) {
+		n_vec.push_back(i);
+		iter_vec.push_back(x_iter[i]);
+		analit_vec.push_back(solve_analit(i, x0, x1, eq_a));
+	}
+	
+	std::cout << std::fixed << std::setprecision(6);
+
+	std::cout << std::setw(5) << "n"
+		<< std::setw(20) << "Iter"
+		<< std::setw(20) << "Analit"
+		<< std::setw(20) << "|diff|" << std::endl;
+	std::cout << std::string(65, '-') << std::endl;
+
+	for (int i = 0; i <= n; i++) {
+		double diff = std::abs(iter_vec[i] - analit_vec[i]);
+		std::cout << std::setw(5) << i
+			<< std::setw(20) << iter_vec[i]
+			<< std::setw(20) << analit_vec[i]
+			<< std::setw(20) << diff << std::endl;
+	}
+
+	matplot::hold(matplot::on);
+	auto p1 = matplot::scatter(n_vec, iter_vec);
+	p1->marker_size(8).marker_color("blue");
+
+	auto p2 = matplot::scatter(n_vec, analit_vec);
+	p2->marker_size(10).marker_color("red");
+
+	matplot::hold(matplot::off);
+
+	matplot::xlabel("n");
+	matplot::ylabel("X[n]");
+
+	if (eq_a) {
+		matplot::title("x[n+2] = x[n+1] - x[n]");
+	} else {
+		matplot::title("x[n+2] = 2*x[n+1] - x[n]");
+	}
+
+	matplot::grid(matplot::on);
+	matplot::show();
+}
+
+std::vector<double> solve_iter(int n, double x0, double x1, bool eq_a) {
+
+	std::vector<double> x(n + 1);
+	x[0] = x0;
+	x[1] = x1;
+
+	for (int i = 0; i <= n - 2; i++) {
+		if (eq_a) {
+			x[i + 2] = x[i + 1] - x[i];
+		} else {
+			x[i + 2] = 2*x[i + 1] - x[i];
+		}
+	}
+
+	return x;
+}
+
+double solve_analit(int n, double x0, double x1, bool eq_a) {
+	if (eq_a) {
+		const double pi = std::acos(-1.0);
+		const double C1 = x0;
+		const double C2 = (2 * x1 - x0) / std::sqrt(3.0);
+		return C1 * std::cos(pi * n / 3.0) + C2 * std::sin(pi * n / 3.0);
+	} else {
+		return x0 + (x1 - x0) * n;
+	}
 }
 
 long long fib_iter(const int n) {
